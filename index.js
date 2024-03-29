@@ -52,6 +52,94 @@ async function mainFunc() {
     const doctorsCollection = database.collection("doctors");
     const paymentsCollection = database.collection("payments");
 
+    app.get("/appointmentOptions", async (req, res) => {
+      const date = req.query.date;
+      const query = {};
+      const options = await appointmentOptionCollection.find(query).toArray();
+
+      // get the bookings of the provided date
+      const bookingQuery = { appointmentDate: date };
+      const alreadyBooked = await bookingsCollection
+        .find(bookingQuery)
+        .toArray();
+
+      // code carefully :D
+      options.forEach((option) => {
+        const optionBooked = alreadyBooked.filter(
+          (book) => book.treatment === option.name
+        );
+        const bookedSlots = optionBooked.map((book) => book.slot);
+        const remainingSlots = option.slots.filter(
+          (slot) => !bookedSlots.includes(slot)
+        );
+        option.slots = remainingSlots;
+      });
+      res.send(options);
+    });
+
+    app.get("/v2/appointmentOptions", async (req, res) => {
+      const date = req.query.date;
+      const options = await appointmentOptionCollection
+        .aggregate([
+          {
+            $lookup: {
+              from: "bookings",
+              localField: "name",
+              foreignField: "treatment",
+              pipeline: [
+                {
+                  $match: {
+                    $expr: {
+                      $eq: ["$appointmentDate", date],
+                    },
+                  },
+                },
+              ],
+              as: "booked",
+            },
+          },
+          {
+            $project: {
+              name: 1,
+              price: 1,
+              slots: 1,
+              image: 1,
+              specialty: 1,
+              booked: {
+                $map: {
+                  input: "$booked",
+                  as: "book",
+                  in: "$$book.slot",
+                },
+              },
+            },
+          },
+          {
+            $project: {
+              name: 1,
+              price: 1,
+              slots: {
+                $setDifference: ["$slots", "$booked"],
+              },
+              image: 1,
+              specialty: 1,
+            },
+          },
+        ])
+        .toArray();
+      res.send(options);
+    });
+
+    app.get("/appointmentSpecialty", async (req, res) => {
+      const query = {};
+      const result = await appointmentOptionCollection
+        .find(query)
+        .project({ specialty: 1 })
+        .toArray();
+      console.log(result);
+      res.send(result);
+    });
+
     app.get("/bookings", verifyJWT, async (req, res) => {
       const email = req.query.email;
       const decodedEmail = req.decoded.email;
@@ -118,9 +206,6 @@ async function mainFunc() {
       const result = await usersCollection.insertOne(user);
       res.send(result);
     });
-
-
-    
   } catch (error) {
     console.error(error);
   }
