@@ -241,6 +241,19 @@ async function mainFunc() {
       );
       res.send(result);
     });
+
+    app.post("/doctors", verifyJWT, verifyAdmin, async (req, res) => {
+      const doctor = req.body;
+      const result = await doctorsCollection.insertOne(doctor);
+      res.send(result);
+    });
+
+    app.get("/doctors", verifyJWT, verifyAdmin, async (req, res) => {
+      const query = {};
+      const doctors = await doctorsCollection.find(query).toArray();
+      res.send(doctors);
+    });
+    
   } catch (error) {
     console.error(error);
   }
