@@ -1,7 +1,9 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
+const jwt = require("jsonwebtoken");
 const { MongoClient, ObjectId } = require("mongodb");
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 require("dotenv").config();
 
@@ -275,7 +277,6 @@ async function mainFunc() {
         clientSecret: paymentIntent.client_secret,
       });
     });
-
 
     app.post("/payments", async (req, res) => {
       const payment = req.body;
