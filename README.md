@@ -1,17 +1,17 @@
-# medical care healthy server
+# Medical care healthy server
 
-medical care healthy is a web application designed to manage appointments and bookings for a medical clinic. It provides features for users to schedule appointments with doctors, administrators to manage doctors and appointments, and a payment system for booking confirmations.
+Medical Care Healthy is a web application designed to manage appointments and bookings for a medical clinic. It provides features for users to schedule appointments with doctors, administrators to manage doctors and appointments, and a payment system for booking confirmations.
 
 ## Technologies Used
 
 - express
-- jsonwebtoken
-- mongodb
+- JSON web token
+- MongoDB
 - stripe
 
 ## Features
 
-- **User Authentication**: Users can register, login, and obtain JSON Web Tokens (JWT) for authentication.
+- **User Authentication**: Users can register, log in, and obtain JSON Web Tokens (JWT) for authentication.
 - **Appointment Scheduling**: Users can view available appointment options, book appointments, and receive confirmation emails.
 - **Administrator Dashboard**: Administrators can manage doctors, view bookings, and grant administrative privileges.
 - **Stripe Integration**: Integration with Stripe for processing payments for bookings.
